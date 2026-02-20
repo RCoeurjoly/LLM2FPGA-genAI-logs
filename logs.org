@@ -1,0 +1,136 @@
+* template
+** the model used
+gpt-5.3-codex-spark
+** dates and times of prompts
+** the prompts themselves
+** the unedited output
+* 1
+** the model used
+gpt-5.3-codex-spark
+** dates and times of prompts
+2026-02-20 13:15:48
+** the prompts themselves
+Review deliverable 2b, for completeness, clarity, correctness and adherence to the goals of the subtask, that can be found in docs.
+** the unedited output
+• I’ll locate the subtask and deliverable 2b specs in the docs, then review the corresponding deliverable output against those
+  criteria and report findings ranked by severity with concrete references.
+
+• Ran pwd && ls -1 AGENTS.md docs | sed -n '1,120p'
+  └ /home/roland/LLM2FPGA
+    ls: cannot access 'AGENTS.md': No such file or directory
+    … +4 lines
+    project-plan_v2
+    project-plan_v2.org
+
+• Explored
+  are defined so I can compare against the submitted material.
+
+• Ran sed -n '80,170p' docs/project-plan_v2.org && echo '---' && sed -n '330,430p' docs/project-plan_v2.org && echo '---' && rg -n
+  │ "2b\)|subtask b|Subtask b|Deliverable" docs -g'*.org' -g'docs/project-plan_v2'
+  └
+
+    … +119 lines
+    docs/project-plan_v2.org:328:**** TODO Subtask b consists of:
+    docs/project-plan_v2.org:344:*** Deliverables
+
+• Explored
+  └ Search 2b\) in docs
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  └
+
+    … +338 lines
+      --empty-tensor-to-alloc-tensor \
+      --one-shot-bufferize="bufferize-function-boundaries" \
+
+• Explored
+  └ Search PyTorch simulation trace|systemverilog testbench|comparison|2b|subtask b|matmul\.sv|testbench|trace
+    List deliverables
+    List 2b
+    List 2b
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• I found a dedicated deliverables/2b-pytorch-sv-equivalence.org, and I’ll now check its stated evidence plus the referenced outputs/
+  scripts to verify whether it fully satisfies the deliverable acceptance.
+
+• Ran sed -n '1,260p' deliverables/2b-pytorch-sv-equivalence.org && echo '---' && sed -n '1,220p' flake.nix && echo '---' && rg -n
+  │ "2b|sim-main|tb_main|sim/tb_main|matmul\.sv|gtkwave|trace|verilator|expected|got" -S deliverables/2b-pytorch-sv-equivalence.org
+  │ docs/project-plan_v2.org docs/project-plan_v2
+  └ * Deliverable 2b: PyTorch simulation trace, SystemVerilog testbench, and comparison
+
+    … +287 lines
+    docs/project-plan_v2:142:- nix flake and matmul.sv from executing it
+    docs/project-plan_v2:144:- PyTorch simulation trace, systemverilog testbench and their comparison
+
+• Ran sed -n '1,220p' sim/test_vectors.json && echo '---' && sed -n '1,260p' sim/gen_tb_data.py && echo '---' && sed -n '1,260p' sim/
+  │ tb_main.sv && echo '---' && sed -n '1,220p' sim/README*
+  └ {
+      "version": 1,
+    … +195 lines
+    ---
+    sed: can't read sim/README*: No such file or directory
+
+✔ You approved codex to always run commands that start with test -f sim/tb_data.sv
+
+• Ran test -f sim/tb_data.sv && echo EXISTS_tb_data_sv || echo MISSING_tb_data_sv; test -f sim/matmul-sv-sim.json && echo EXISTS_json
+  │ || echo MISSING_json; ls -l sim | sed -n '1,200p'
+  └ MISSING_tb_data_sv
+    MISSING_json
+    … +4 lines
+    -rw-r--r-- 1 roland roland 2940 Feb 20 12:36 tb_main.sv
+    -rw-r--r-- 1 roland roland  328 Feb 18 13:20 test_vectors.json
+
+• Ran sed -n '1,220p' sim/sim_utils.py && echo '---' && sed -n '1,220p' src/matmul.py && echo '---' && ls -l
+  │ deliverables/2b-pytorch-sv-equivalence.org deliverables/2b
+  └ import importlib.util
+    import os
+    … +24 lines
+    total 96
+    -rw-r--r-- 1 roland roland 95888 Feb 20 11:31 gtkwave capture 2b.png
+
+• Explored
+  └ Search Deliverable 2b|2b\)|PyTorch simulation trace|systemverilog|testbench|equivalence|comparison|1c in project-plan_v1
+    Read project-plan_v1
+    Read 2a-nix-flake-and-matmul-sv.org, 2b-pytorch-sv-equivalence.org, flake.nix, project-plan_v2.org
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Findings (ordered by severity)
+
+  1. Medium — matmul-sv-sim output parser rejects negative results
+
+  - In flake.nix, the success extraction requires PASS: expected [0-9]+ got [0-9]+ at flake.nix:143.
+  - sim/tb_main.sv prints %0d, so negative values are valid at the testbench level (sim/tb_main.sv:105).
+  - Result: valid signed outputs can be incorrectly treated as failure. This hurts correctness for anything beyond the current
+    positive-only vector.
+
+  2. Low — Deliverable text claims a “trace” but no explicit trace artifact is captured
+
+  - The 2b doc says “PyTorch simulation trace” in scope (deliverables/2b-pytorch-sv-equivalence.org:1, :6-9) and artifacts list
+    (deliverables/2b-pytorch-sv-equivalence.org:21-28), but the concrete stored outputs are tb_data.sv, a pass/fail JSON, and
+    screenshot.
+  - There is no committed/persisted PyTorch run transcript (or equivalent structured trace) in-repo, which makes auditing the
+    PyTorch-vs-SV comparison less direct.
+
+  3. Low — Minor clarity issue in PASS-line text
+
+  - deliverables/2b-pytorch-sv-equivalence.org:32 says: PASS: expected <expected> got <expected> (duplicate token), while runtime
+    output is expected ... got ....
+  - This is documentation-only, but it creates confusion when checking evidence.
+
+  Overall adherence assessment
+
+  - Adherence to subtask goal: mostly complete for subtask b in scope (docs/project-plan_v2.org:115) since it runs fixed-input
+    PyTorch + RTL comparison via Verilator flow and uses the stated kernel source path.
+  - Completeness: partially limited to one fixed case by design (deliverables/2b-pytorch-sv-equivalence.org:7-9) and lacks a clearly
+    named “PyTorch trace” artifact.
+  - Clarity: generally good, but the PASS-line wording typo and ambiguous trace artifact wording should be tightened.
+
+  Open items to confirm
+
+  1. Should matmul-sv-sim and any generated comparison logs support signed/int32 outputs ([-]?[0-9]+) by default?
+  2. Should the deliverable include a committed or checked-in sample of the PyTorch simulator output (e.g., pytorch_trace.json or
+     text log) to satisfy the “trace” wording explicitly?
+
+

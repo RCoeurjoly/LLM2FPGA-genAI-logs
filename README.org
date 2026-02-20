@@ -1,0 +1,3 @@
+genAI usage logging for LLM2FPGA.
+
+See https://nlnet.nl/foundation/policies/generativeAI/ for the policy we are following.
