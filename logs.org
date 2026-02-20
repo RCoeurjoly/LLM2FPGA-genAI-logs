@@ -132,5 +132,66 @@ Review deliverable 2b, for completeness, clarity, correctness and adherence to t
   1. Should matmul-sv-sim and any generated comparison logs support signed/int32 outputs ([-]?[0-9]+) by default?
   2. Should the deliverable include a committed or checked-in sample of the PyTorch simulator output (e.g., pytorch_trace.json or
      text log) to satisfy the “trace” wording explicitly?
+* 2
+** the model used
+gpt-5.3-codex-spark
+** dates and times of prompts
+2026-02-20 15:53:20
+** the prompts themselves
+Review deliverable 2c.
+** the unedited output
+• Ran pwd && rg --files | rg -n "2c|deliverable2c|deliverable_2c|deliv2c|assignment2c|2C|deliverable|homework"
+  └ /home/roland/LLM2FPGA
+    16:deliverables/2a-nix-flake-and-matmul-sv.org
+    … +7 lines
+    28:deliverables/1a-survey.org
+    29:deliverables/2b/gtkwave capture 2b.png
 
+• Explored
+  └ Search 2c|Deliverable 2c|deliverable 2c|yosys|IL|statistics|stat in 2c-yosys-il-and-stat.org
+    Read 2c-yosys-il-and-stat.org
 
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• I found the 2c write-up file; next I’m checking the actual Nix/build definitions and outputs that back it, so I can verify the
+  deliverable is actually implemented correctly.
+
+• Explored
+  └ Search matmul-il|matmul-yosys-stat|yosys.stat|stat -json|read_slang|write_rtlil|flatten|memory in flake.nix
+    Search deliverable 2c|2c|matmul.il|matmul-yosys.stat|yosys
+    Search module matmul|matmul.sv|top\s*\(|matrix
+    Search matmul
+    Read flake.nix
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• I’ve got the key 2c implementation lines; I’ll quickly cross-check against project-plan_v2 and the deliverable text for any
+  mismatches in scope, artifact names, and command behavior.
+
+• Explored
+  └ Read project-plan_v2.org, flake.nix
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Reviewed deliverable 2c against the implementation in flake.nix and deliverables/2c-yosys-il-and-stat.org.
+
+  Findings:
+
+  - No blocking issues found.
+
+  What’s implemented correctly:
+
+  - matmul-il derivation is defined in flake.nix and invokes Yosys with read_slang plus the stated elaboration passes (proc, opt,
+    memory, flatten, opt, write_rtlil).
+  - matmul-yosys-stat derivation is defined in flake.nix and runs stat -json on the generated RTLIL into matmul-yosys.stat.
+  - Artifact names and intended commands in deliverables/2c-yosys-il-and-stat.org align with flake.nix outputs.
+
+  Residual risk / testing gap:
+
+  - I did not run nix build .#matmul-il or nix build .#matmul-yosys-stat in this review pass, so success is not independently
+    validated here.
+
+  Open questions:
+
+  - If you want strict enforcement of “parseable JSON,” we should add a small parse check (e.g. jq) in the matmul-yosys-stat
+    derivation so invalid output fails the build early.
